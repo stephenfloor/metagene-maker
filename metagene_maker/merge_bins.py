@@ -17,7 +17,7 @@ def concatChrs(start, end, folders, folderToGraph, regions):
 		for region in regions: 
 			folder = binFolder + '/' + region + '/'
 			os.chdir(folder)
-			if len(glob.glob("chr*")) != 0: os.system("cat chr* > allchr.txt")
+			if len(glob.glob("*txt")) != 0: os.system("cat *txt > allchr.txt")
 			os.system("sort -rn -t $'\t' -k7,7 allchr.txt > allchr_sorted.txt")
 			os.system("rm -f allchr.txt")
 
@@ -25,15 +25,15 @@ def randomSampleMean(df):
 	rows = np.random.choice(df.shape[0], df.shape[0]/10, replace=True)
 	return df.iloc[rows,:].mean(axis=0)
 	
-def getColumnMean(dir, isMinus, toSample, numProcs):
+def getColumnMean(dir, isMinus, toSample, pool):
 	a = pd.read_table(dir + "allchr_sorted.txt", header=None)
 	b = a[range(7,len(a.columns))]
 	x = b.mean(axis=0)
 	
 	nSamples = 200
 	if toSample:
-		P = multiprocessing.Pool(processes=numProcs)
-		allmeans = pd.DataFrame(P.map(randomSampleMean, [b]*nSamples))
+		#allmeans = pd.DataFrame(pool.map(randomSampleMean, [b]*nSamples))
+		allmeans = pd.DataFrame(map(randomSampleMean, [b]*nSamples))
 		
 		# take median of means
 		median_of_means = allmeans.apply(np.median, axis=0)

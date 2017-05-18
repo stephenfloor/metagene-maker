@@ -126,7 +126,7 @@ def processFolders(parentDir, folders, regions):
 
 # checks whether file is a bed file
 def isBed(row):
-	if 'chr' not in row[0]: return False
+	#if 'chr' not in row[0]: return False
 	try:
 		a,b=int(row[1]), int(row[2]) #start/end ok?
 		
@@ -275,6 +275,8 @@ def main():
 	os.chdir(parentDir)
 	if not glob.glob("averages"): os.system("mkdir averages")
 
+	pool = multiprocessing.Pool(processes=2)  
+
 	for region in regions:
 		numBins = int(regions[region][2])
 		extension = int(regions[region][3])
@@ -290,9 +292,9 @@ def main():
 			
 			if toSample:
 				fs = folder + " (sampled)"
-				(regionToFolderAvgs[region][folder], regionToFolderAvgs[region][fs]) = getColumnMean(dir, isMinus, toSample, numProcs)
+				(regionToFolderAvgs[region][folder], regionToFolderAvgs[region][fs]) = getColumnMean(dir, isMinus, toSample, pool)
 			else:
-				regionToFolderAvgs[region][folder] = getColumnMean(dir, isMinus, toSample, numProcs)
+				regionToFolderAvgs[region][folder] = getColumnMean(dir, isMinus, toSample, pool)
 		logger.info("%s_%s", prefix, region)
 		writeFile(prefix + '_' + region, regionToFolderAvgs[region], parentDir + '/averages/')
 
